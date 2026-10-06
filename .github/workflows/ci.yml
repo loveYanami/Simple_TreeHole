@@ -1,0 +1,28 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      # 用 npm ci 而不是 npm install：它严格按 package-lock.json 安装，
+      # 这正是「可复现」在 CI 里的具体含义。
+      - run: npm ci
+
+      # 刻意不带 --fix：CI 应该报告问题，而不是悄悄改完再通过。
+      - run: npx oxlint .
+      - run: npx eslint .
+
+      - run: npm run type-check
+      - run: npm run build

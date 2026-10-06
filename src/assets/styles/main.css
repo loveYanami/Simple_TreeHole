@@ -1,0 +1,166 @@
+/* 全局基础样式。视觉目标只有一个词：简洁。 */
+
+:root {
+  /* 底色带一点暖调，和粉色主色同一色系 —— 冷灰底配粉色会显得主色是"贴上去的" */
+  --th-bg: #faf6f8;
+  --th-surface: #ffffff;
+  --th-border: #eee6ea;
+  --th-text: #1f2328;
+  --th-text-soft: #6b7280;
+  --th-text-faint: #9ca3af;
+
+  /* 主色。这个深度的粉（不是 B 站粉那种亮粉）是刻意选的：
+     白色文字压在它上面的对比度是 4.6:1，刚好过 WCAG AA。
+     换成更浅的粉，按钮上的字就开始糊了 —— 见 README 的说明。 */
+  --th-primary: #db2777;
+  /* 主色的浅色底（「我」标签的底色）。想换主题色时改这里不用改组件。 */
+  --th-primary-soft: rgba(219, 39, 119, 0.12);
+
+  --th-radius: 10px;
+  --th-max-width: 880px;
+
+  /* 匿名头像配色池 —— AnonAvatar 按索引取用，见 src/utils/anon.ts */
+  --th-avatar-0: #db2777;
+  --th-avatar-1: #22a06b;
+  --th-avatar-2: #e0625a;
+  --th-avatar-3: #b06ee0;
+  --th-avatar-4: #e0913a;
+  --th-avatar-5: #3aa8c1;
+  /* 原本这里是粉色，现在主色也是粉，两者会撞色 —— 换成蓝色补足色相 */
+  --th-avatar-6: #5b8def;
+  --th-avatar-7: #6b7a8f;
+
+  /* 让 Element Plus 的主色和整体调性对齐。
+     只覆盖 --el-color-primary 是不够的：组件库的悬停态、禁用态、浅色边框
+     都取自下面这组派生色。漏掉它们，按钮一悬停就会从粉色跳回原来的蓝色。 */
+  --el-color-primary: #db2777;
+  --el-color-primary-light-3: #e668a0;
+  --el-color-primary-light-5: #ed93bb;
+  --el-color-primary-light-7: #f4bed6;
+  --el-color-primary-light-8: #f8d4e4;
+  --el-color-primary-light-9: #fbe9f1;
+  --el-color-primary-dark-2: #af1f5f;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--th-bg);
+  color: var(--th-text);
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB',
+    'Microsoft YaHei', sans-serif;
+  font-size: 14px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+.app-main {
+  flex: 1;
+  padding: 24px 16px 48px;
+}
+
+.container {
+  width: 100%;
+  max-width: var(--th-max-width);
+  margin: 0 auto;
+}
+
+.card {
+  background: var(--th-surface);
+  border: 1px solid var(--th-border);
+  border-radius: var(--th-radius);
+}
+
+.page-title {
+  margin: 0 0 16px;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.text-soft {
+  color: var(--th-text-soft);
+}
+
+.text-faint {
+  color: var(--th-text-faint);
+}
+
+/* 正文里的换行要保留 —— 树洞的帖子常常是多段文字，
+   而 CSS 默认会把换行折叠成空格。 */
+.preserve-lines {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* ===== 按钮交互 =====
+ *
+ * 用 transform 而不是改 width/height/padding，是因为 transform 只影响绘制、
+ * 不参与布局计算 —— 按钮放大时不会把旁边的元素挤开，也就不会有一圈抖动。
+ *
+ * 缓动曲线 cubic-bezier(0.34, 1.56, 0.64, 1) 的第二段超过 1，会轻微冲过头
+ * 再回弹（overshoot），这是"弹一下"手感的来源。想更含蓄就换成 ease-out。
+ */
+.el-button {
+  transition:
+    transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.18s ease,
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.el-button:not(.is-disabled):not(.is-loading):hover {
+  transform: translateY(-1px) scale(1.045);
+  box-shadow: 0 4px 12px rgba(31, 35, 40, 0.1);
+}
+
+/* 主色按钮给一点同色的光晕，比中性灰影更有质感 */
+.el-button--primary:not(.is-disabled):not(.is-loading):hover {
+  box-shadow: 0 5px 16px rgba(219, 39, 119, 0.3);
+}
+
+/* 按下时缩回去一点，给出"按下去了"的反馈 */
+.el-button:not(.is-disabled):not(.is-loading):active {
+  transform: translateY(0) scale(0.97);
+  box-shadow: none;
+}
+
+/* 纯文字按钮（返回、登录、注册这类）放大时不要投影，会脏 */
+.el-button.is-text:hover,
+.el-button.is-link:hover {
+  box-shadow: none;
+}
+
+/* 尊重系统的"减少动态效果"设置 —— 前庭功能敏感的人会被这类动画困扰 */
+@media (prefers-reduced-motion: reduce) {
+  .el-button,
+  .like-button {
+    transition: none;
+  }
+
+  .el-button:not(.is-disabled):not(.is-loading):hover,
+  .el-button:not(.is-disabled):not(.is-loading):active {
+    transform: none;
+  }
+}
