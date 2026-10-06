@@ -30,7 +30,7 @@
 ## 快速开始
 
 ```bash
-npm ci        # 不是 npm install —— 见下方「关于可复现」
+npm ci       
 npm run dev   # 打开 http://localhost:5173
 ```
 
