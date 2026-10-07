@@ -12,10 +12,10 @@ import {
   listComments,
   saveImages,
 } from '@/api'
-import type { CommentDTO, PostDTO } from '@/api'
+import type { CommentDTO, PostDTO, ReactionResult } from '@/api'
 import AnonAvatar from '@/components/common/AnonAvatar.vue'
 import ImageGallery from '@/components/common/ImageGallery.vue'
-import LikeButton from '@/components/common/LikeButton.vue'
+import ReactionBar from '@/components/common/ReactionBar.vue'
 import CommentForm from '@/components/comment/CommentForm.vue'
 import CommentList from '@/components/comment/CommentList.vue'
 import ListSkeleton from '@/components/common/ListSkeleton.vue'
@@ -75,10 +75,16 @@ function reload() {
 onMounted(reload)
 watch(() => props.id, reload)
 
-function onLike(payload: { liked: boolean; count: number }) {
+function onReact(payload: ReactionResult) {
   if (!post.value) return
   // DTO 被 Object.freeze 过，所以只能整条替换
-  post.value = { ...post.value, likedByMe: payload.liked, likeCount: payload.count }
+  post.value = {
+    ...post.value,
+    likedByMe: payload.liked,
+    likeCount: payload.likeCount,
+    dislikedByMe: payload.disliked,
+    dislikeCount: payload.dislikeCount,
+  }
 }
 
 async function onComment(payload: { content: string; images: File[] }) {
@@ -202,18 +208,23 @@ async function onDeletePost() {
           </el-button>
         </header>
 
-        <h1 class="post-title">{{ post.title }}</h1>
+        <h1 class="post-title">
+          <span class="post-no" :title="`第 ${post.no} 号帖子`">#{{ post.no }}</span>
+          <span class="post-title-text">{{ post.title }}</span>
+        </h1>
         <div class="post-content preserve-lines">{{ post.content }}</div>
 
         <!-- 没有配图时它自己什么都不渲染，不需要在这里判断 -->
         <ImageGallery :ids="post.imageIds" />
 
         <footer class="post-footer">
-          <LikeButton
+          <ReactionBar
             :post-id="post.id"
             :liked="post.likedByMe"
-            :count="post.likeCount"
-            @update="onLike"
+            :like-count="post.likeCount"
+            :disliked="post.dislikedByMe"
+            :dislike-count="post.dislikeCount"
+            @update="onReact"
           />
           <span class="text-faint">{{ post.commentCount }} 条评论</span>
         </footer>
@@ -290,10 +301,28 @@ async function onDeletePost() {
 }
 
 .post-title {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
   margin: 20px 0 0;
   font-size: 22px;
   font-weight: 600;
   line-height: 1.45;
+}
+
+.post-no {
+  flex-shrink: 0;
+  padding: 0 8px;
+  border-radius: 6px;
+  background: var(--th-primary-soft);
+  color: var(--th-primary);
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+  line-height: 26px;
+}
+
+.post-title-text {
+  min-width: 0;
 }
 
 .post-content {

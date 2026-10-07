@@ -33,14 +33,17 @@ function countComments(db: Db, postId: string): number {
 export function toPostDTO(post: Post, db: Db, viewerId: string | null): PostDTO {
   return Object.freeze({
     id: post.id,
+    no: post.no,
     title: post.title,
     content: post.content,
     anonName: anonName(post.authorId, scopeOf(post.id)),
     avatarIndex: anonAvatarIndex(post.authorId, scopeOf(post.id)),
     createdAt: post.createdAt,
     likeCount: post.likedBy.length,
+    dislikeCount: post.dislikedBy.length,
     commentCount: countComments(db, post.id),
     likedByMe: viewerId !== null && post.likedBy.includes(viewerId),
+    dislikedByMe: viewerId !== null && post.dislikedBy.includes(viewerId),
     isMine: viewerId !== null && post.authorId === viewerId,
     // 复制一份再冻结：组件既改不了这个数组，也够不着库里那一份。
     // 只传 id、不传图片本体 —— 二进制在 IndexedDB，由展示层按需去取。

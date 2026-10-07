@@ -2,7 +2,8 @@
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { ApiError, listPosts } from '@/api'
 import type { PostDTO, PostSort } from '@/api'
-import { withLikeResult } from '@/utils/dto'
+import { withReactionResult } from '@/utils/dto'
+import type { ReactionUpdate } from '@/utils/dto'
 import EmptyState from '@/components/common/EmptyState.vue'
 import ListSkeleton from '@/components/common/ListSkeleton.vue'
 import PostList from '@/components/post/PostList.vue'
@@ -75,8 +76,8 @@ onBeforeUnmount(() => {
   if (searchTimer !== undefined) clearTimeout(searchTimer)
 })
 
-function onLike(payload: { postId: string; liked: boolean; count: number }) {
-  posts.value = withLikeResult(posts.value, payload.postId, payload)
+function onReact(payload: ReactionUpdate) {
+  posts.value = withReactionResult(posts.value, payload.postId, payload)
 }
 </script>
 
@@ -85,7 +86,7 @@ function onLike(payload: { postId: string; liked: boolean; count: number }) {
     <div class="toolbar card">
       <el-input
         v-model="keyword"
-        placeholder="搜索帖子标题或内容"
+        placeholder="搜索标题、正文或编号，例如 #7"
         clearable
         class="search"
         size="large"
@@ -106,11 +107,11 @@ function onLike(payload: { postId: string; liked: boolean; count: number }) {
     <EmptyState
       v-else-if="posts.length === 0"
       :text="isSearching ? '没有找到相关的帖子' : '还没有人发帖'"
-      :hint="isSearching ? '换个关键词试试' : '来写下第一条吧'"
+      :hint="isSearching ? '换个关键词，或者直接输入帖子编号试试' : '来写下第一条吧'"
     />
 
     <template v-else>
-      <PostList :posts="posts" @like="onLike" />
+      <PostList :posts="posts" @react="onReact" />
 
       <div class="footer">
         <el-button v-if="hasMore" :loading="loadingMore" @click="loadMore">加载更多</el-button>

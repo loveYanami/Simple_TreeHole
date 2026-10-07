@@ -21,6 +21,8 @@ export interface UserDTO {
  */
 export interface PostDTO {
   id: string
+  /** 人类可读的编号（1 起、只增不减）。搜索框里输入 `#7` 或 `7` 也能命中它。 */
+  no: number
   title: string
   content: string
   /** 派生假名，例如「树友 a3f9」。不落库，由 hash(authorId + postId) 现算。 */
@@ -29,9 +31,12 @@ export interface PostDTO {
   avatarIndex: number
   createdAt: string
   likeCount: number
+  dislikeCount: number
   commentCount: number
   /** 当前登录用户是否点过赞 */
   likedByMe: boolean
+  /** 当前登录用户是否踩过。与 likedByMe 不会同时为 true。 */
+  dislikedByMe: boolean
   /** 当前登录用户是否就是作者 */
   isMine: boolean
   /**
@@ -73,9 +78,18 @@ export interface PageParams {
   pageSize?: number
 }
 
-export interface LikeResult {
+/**
+ * 一次赞/踩操作之后，这条帖子的完整表态状态。
+ *
+ * 刻意**同时**返回赞和踩两个维度，而不是只返回被点的那一个：赞和踩是互斥的，
+ * 点一次赞会顺带取消踩。只回一半的话，客户端就得自己猜另一半变成了什么 ——
+ * 那正是乐观更新最容易悄悄错的地方。
+ */
+export interface ReactionResult {
   liked: boolean
   likeCount: number
+  disliked: boolean
+  dislikeCount: number
 }
 
 export interface Credentials {

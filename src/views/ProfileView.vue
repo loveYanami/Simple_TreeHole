@@ -3,7 +3,8 @@ import { onMounted, ref, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ApiError, deletePost, listMyLikedPosts, listMyPosts } from '@/api'
 import type { PostDTO } from '@/api'
-import { withLikeResult, withoutPost } from '@/utils/dto'
+import { withReactionResult, withoutPost } from '@/utils/dto'
+import type { ReactionUpdate } from '@/utils/dto'
 import EmptyState from '@/components/common/EmptyState.vue'
 import ListSkeleton from '@/components/common/ListSkeleton.vue'
 import PostList from '@/components/post/PostList.vue'
@@ -37,10 +38,11 @@ async function load() {
 onMounted(load)
 watch(tab, load)
 
-function onLike(payload: { postId: string; liked: boolean; count: number }) {
-  posts.value = withLikeResult(posts.value, payload.postId, payload)
+function onReact(payload: ReactionUpdate) {
+  posts.value = withReactionResult(posts.value, payload.postId, payload)
 
-  // 在「我赞过的」里取消点赞，这条就不该继续留在这个列表里
+  // 在「我赞过的」里取消点赞、或者改成点踩（互斥会顺手撤掉赞），
+  // 这条都不该继续留在这个列表里 —— 这个列表的定义就是「赞还在的那些」。
   if (tab.value === 'liked' && !payload.liked) {
     posts.value = withoutPost(posts.value, payload.postId)
   }
@@ -104,7 +106,7 @@ async function onDelete(id: string) {
       v-else
       :posts="posts"
       :deletable="tab === 'posts'"
-      @like="onLike"
+      @react="onReact"
       @delete="onDelete"
     />
   </div>

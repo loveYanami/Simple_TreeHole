@@ -28,6 +28,11 @@ interface PostSeed {
   content: string
   hoursAgo: number
   likedBy: string[]
+  /**
+   * 踩过的人。⚠️ 必须与 likedBy 不相交 —— 赞和踩是互斥的，
+   * 种子数据违反这条会让「同一个人既赞又踩」出现在页面上，看起来像 bug。
+   */
+  dislikedBy?: string[]
 }
 
 const POST_SEEDS: PostSeed[] = [
@@ -75,6 +80,7 @@ const POST_SEEDS: PostSeed[] = [
     content: '前端、算法、游戏开发……每个都觉得有意思，每个都开了个头就断了。有点挫败。',
     hoursAgo: 40,
     likedBy: [],
+    dislikedBy: ['u_sakura'],
   },
   {
     author: 'u_sakura',
@@ -82,6 +88,7 @@ const POST_SEEDS: PostSeed[] = [
     content: '已经连续一周了，凌晨两点还在开麦。不想把关系搞僵，但我也要早起。',
     hoursAgo: 52,
     likedBy: ['u_yuki'],
+    dislikedBy: ['u_demo'],
   },
   {
     author: 'u_yuki',
@@ -97,6 +104,7 @@ const POST_SEEDS: PostSeed[] = [
       '准备了两周，进去五分钟就出来了。面试官问的问题我一句都没答上来，全程大脑空白。\n\n现在想起来还是很难受。',
     hoursAgo: 80,
     likedBy: [],
+    dislikedBy: ['u_yuki'],
   },
   {
     author: 'u_sakura',
@@ -247,11 +255,16 @@ export function buildSeed(): Db {
 
   const posts: Post[] = POST_SEEDS.map((p, i) => ({
     id: postId(i + 1),
+    // ⚠️ POST_SEEDS 是按「最新在前」写的（这样读起来像信息流），但编号必须
+    // **从最早的帖子开始数** —— 否则最新的种子帖会拿到 1 号，编号和时间反着走，
+    // 新发的帖子还会插在 #1 上面。所以这里把方向反过来：数组第一条拿最大的号。
+    no: POST_SEEDS.length - i,
     authorId: p.author,
     title: p.title,
     content: p.content,
     createdAt: iso(p.hoursAgo),
     likedBy: [...p.likedBy],
+    dislikedBy: [...(p.dislikedBy ?? [])],
     // 种子数据不带图：图片是二进制，没法在同步的播种流程里生成。
     // 想看效果就自己发一条带图的帖子。
     imageIds: [],
@@ -266,5 +279,6 @@ export function buildSeed(): Db {
     imageIds: [],
   }))
 
-  return { version: SCHEMA_VERSION, users, posts, comments }
+  // 序列接在种子帖之后：第 1 条新帖拿到 POST_SEEDS.length + 1
+  return { version: SCHEMA_VERSION, nextPostNo: posts.length + 1, users, posts, comments }
 }

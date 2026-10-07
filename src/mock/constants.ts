@@ -24,4 +24,4 @@ export const DEMO_ACCOUNT = { username: 'demo', password: 'demo1234' } as const
  * 页面白屏 —— 而无痕模式打开却一切正常，这个反差会把人引向完全错误的排查方向。
  * 版本不匹配时自动重新播种，是最省事的兜底。
  */
-export const SCHEMA_VERSION = 2
+export const SCHEMA_VERSION = 3

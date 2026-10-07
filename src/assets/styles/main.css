@@ -13,6 +13,9 @@
      白色文字压在它上面的对比度是 4.6:1，刚好过 WCAG AA。
      换成更浅的粉，按钮上的字就开始糊了 —— 见 README 的说明。 */
   --th-primary: #db2777;
+  /* 主色的深色端。标题的渐变文字用它收尾，Element Plus 的 dark-2 也指向它 ——
+     同一个颜色只有一个出处，改主题色时不会漏掉其中一处。 */
+  --th-primary-deep: #af1f5f;
   /* 主色的浅色底（「我」标签的底色）。想换主题色时改这里不用改组件。 */
   --th-primary-soft: rgba(219, 39, 119, 0.12);
 
@@ -39,7 +42,7 @@
   --el-color-primary-light-7: #f4bed6;
   --el-color-primary-light-8: #f8d4e4;
   --el-color-primary-light-9: #fbe9f1;
-  --el-color-primary-dark-2: #af1f5f;
+  --el-color-primary-dark-2: var(--th-primary-deep);
 }
 
 * {
@@ -152,10 +155,11 @@ a {
   box-shadow: none;
 }
 
-/* 尊重系统的"减少动态效果"设置 —— 前庭功能敏感的人会被这类动画困扰 */
+/* 尊重系统的"减少动态效果"设置 —— 前庭功能敏感的人会被这类动画困扰。
+   组件自己 scoped 块里的动效由组件自己关（见 ReactionBar.vue）：scoped 样式
+   会多带一个属性选择器，优先级比这里高，写在这儿是盖不住的。 */
 @media (prefers-reduced-motion: reduce) {
-  .el-button,
-  .like-button {
+  .el-button {
     transition: none;
   }
 

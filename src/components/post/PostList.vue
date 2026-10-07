@@ -1,16 +1,18 @@
 <script setup lang="ts">
-import type { PostDTO } from '@/api'
+import type { PostDTO, ReactionResult } from '@/api'
+import type { ReactionUpdate } from '@/utils/dto'
 import PostCard from './PostCard.vue'
 
 withDefaults(defineProps<{ posts: PostDTO[]; deletable?: boolean }>(), { deletable: false })
 
 const emit = defineEmits<{
-  (e: 'like', payload: { postId: string; liked: boolean; count: number }): void
+  (e: 'react', payload: ReactionUpdate): void
   (e: 'delete', id: string): void
 }>()
 
-function onLike(postId: string, payload: { liked: boolean; count: number }) {
-  emit('like', { postId, ...payload })
+/** 卡片只管表态结果，是哪条帖子由列表补上 —— 它才知道自己在渲染谁。 */
+function onReact(postId: string, payload: ReactionResult) {
+  emit('react', { postId, ...payload })
 }
 </script>
 
@@ -21,7 +23,7 @@ function onLike(postId: string, payload: { liked: boolean; count: number }) {
       :key="post.id"
       :post="post"
       :deletable="deletable"
-      @like="onLike(post.id, $event)"
+      @react="onReact(post.id, $event)"
       @delete="emit('delete', $event)"
     />
   </div>

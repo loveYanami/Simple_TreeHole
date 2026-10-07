@@ -74,21 +74,37 @@ async function onLogout() {
   display: flex;
   align-items: center;
   gap: 24px;
-  height: 56px;
+  /* 比 56px 高一点，让放大后的品牌字样有呼吸空间，不至于贴着上下边框 */
+  height: 60px;
 }
 
 .brand {
   display: flex;
   align-items: baseline;
-  gap: 8px;
+  gap: 10px;
   flex-shrink: 0;
+  transition: opacity 0.15s;
+}
+
+.brand:hover {
+  opacity: 0.82;
 }
 
 .brand-mark {
-  font-size: 18px;
-  font-weight: 700;
-  letter-spacing: 2px;
-  color: var(--th-primary);
+  font-size: 23px;
+  font-weight: 800;
+  letter-spacing: 3px;
+  /* letter-spacing 会在**最后一个字后面**也加一份间距，把右边撑出 3px 的空。
+     抵消掉，不然它和副标题之间的缝比看上去的宽。 */
+  margin-right: -3px;
+
+  /* 渐变文字。两端都取自主色系里够深的那一端 —— #db2777 对白底是 4.6:1，
+     #af1f5f 更深，所以整条渐变上的字都过 WCAG AA。
+     换成浅粉收尾，末尾那个字就开始糊在背景里了。 */
+  background: linear-gradient(135deg, var(--th-primary) 0%, var(--th-primary-deep) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 .brand-sub {
